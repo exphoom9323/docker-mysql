@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  db-mysql:
+    image: mysql:latest
+    container_name: db-sql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
+    volumes:
+      # - ./init:/docker-entrypoint-initdb.d
+      - ./mysql-data:/var/lib/mysql
+      - ./config/mysql/my.cnf:/usr/local/etc/mysql/my.cnf
+    environment:
+      TZ: "Asia/Bangkok"
+      MYSQL_ROOT_PASSWORD: acc
+      MYSQL_USER: acc
+      MYSQL_PASSWORD: acc
+      MYSQL_DATABASE: pos_shop
+    ports:
+      - 3306:3306
+    networks:
+      - net-mysql
+  phpmyadmin:
+    depends_on:
+      - db-mysql
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    restart: always
+    ports:
+      - 9090:80
+    volumes:
+      - ./config/phpmyadmin/php.ini:/usr/local/etc/php/conf.d/php.ini
+    environment:
+      PMA_HOST: db-mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    networks:
+      - net-mysql
+networks:
+  net-mysql:
+    driver: bridge
